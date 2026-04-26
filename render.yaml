@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: sari-sari-backend
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: CORS_ORIGIN
+        value: https://your-frontend-url.vercel.app
+    plan: free
+
