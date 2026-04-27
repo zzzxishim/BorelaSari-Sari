@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { GlassCard } from '../components/GlassCard';
 import { Plus, Edit, Trash2, Loader2, Calendar, Filter, X } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
-import { api, type Expense } from '../services/api';
+import { api, type Expense, getLocalDateStr } from '../services/api';
 import { socket } from '../services/socket';
 import { toast } from 'sonner';
 
@@ -125,7 +125,7 @@ export function Expenses() {
       return expenses.filter(e => e.date >= customStartDate && e.date <= customEndDate);
     }
     if (filter === 'today') {
-      const d = today.toISOString().split('T')[0];
+      const d = getLocalDateStr(today);
       return expenses.filter(e => e.date === d);
     }
     if (filter === 'week') {

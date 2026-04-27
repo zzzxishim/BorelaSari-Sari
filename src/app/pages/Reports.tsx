@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { GlassCard } from '../components/GlassCard';
 import { Upload, FileText, FileSpreadsheet, Loader2, Calendar, TrendingUp, ShoppingBag, Award } from 'lucide-react';
-import { api } from '../services/api';
+import { api, getLocalDateStr } from '../services/api';
 import { socket } from '../services/socket';
 
 export function Reports() {
@@ -46,7 +46,7 @@ export function Reports() {
       return sales.filter((s: any) => s.date >= customStartDate && s.date <= customEndDate);
     }
     if (filter === 'today') {
-      const d = today.toISOString().split('T')[0];
+      const d = getLocalDateStr(today);
       return sales.filter((s: any) => s.date === d);
     }
     if (filter === 'week') {
@@ -75,7 +75,7 @@ export function Reports() {
       return expenses.filter((e: any) => e.date >= customStartDate && e.date <= customEndDate);
     }
     if (filter === 'today') {
-      const d = today.toISOString().split('T')[0];
+      const d = getLocalDateStr(today);
       return expenses.filter((e: any) => e.date === d);
     }
     if (filter === 'week') {

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { GlassCard } from '../components/GlassCard';
 import { TrendingUp, DollarSign, ShoppingBag, Award, Plus, Filter, Loader2, Edit, Trash2, Calendar } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { api, type Product, type Sale, type DashboardStats } from '../services/api';
+import { api, type Product, type Sale, type Expense, type DashboardStats, getLocalDateStr } from '../services/api';
 import { socket } from '../services/socket';
 import { toast } from 'sonner';
 
@@ -12,6 +12,7 @@ export function UnifiedDashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [sales, setSales] = useState<Sale[]>([]);
+  const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingSale, setEditingSale] = useState<Sale | null>(null);
@@ -22,14 +23,16 @@ export function UnifiedDashboard() {
 
   const fetchAll = async () => {
     try {
-      const [statsRes, productsRes, salesRes] = await Promise.all([
+      const [statsRes, productsRes, salesRes, expensesRes] = await Promise.all([
         api.get('/dashboard/stats'),
         api.get('/products'),
         api.get('/sales'),
+        api.get('/expenses'),
       ]);
       setStats(statsRes.data);
       setProducts(productsRes.data);
       setSales(salesRes.data);
+      setExpenses(expensesRes.data);
     } catch (err) {
       console.error('Failed to fetch dashboard data', err);
     }
@@ -52,7 +55,7 @@ export function UnifiedDashboard() {
     }
 
     if (filter === 'today') {
-      const d = today.toISOString().split('T')[0];
+      const d = getLocalDateStr(today);
       return sales.filter(s => s.date === d);
     } else if (filter === 'week') {
       const weekAgo = new Date(today);
@@ -70,8 +73,44 @@ export function UnifiedDashboard() {
     return sales;
   };
 
+  const getFilteredExpenses = () => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (customStartDate && customEndDate) {
+      return expenses.filter(e => e.date >= customStartDate && e.date <= customEndDate);
+    }
+
+    if (filter === 'today') {
+      const d = getLocalDateStr(today);
+      return expenses.filter(e => e.date === d);
+    } else if (filter === 'week') {
+      const weekAgo = new Date(today);
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      return expenses.filter(e => new Date(e.date) >= weekAgo);
+    } else if (filter === 'month') {
+      const monthAgo = new Date(today);
+      monthAgo.setDate(monthAgo.getDate() - 30);
+      return expenses.filter(e => new Date(e.date) >= monthAgo);
+    } else if (filter === 'year') {
+      const yearAgo = new Date(today);
+      yearAgo.setFullYear(yearAgo.getFullYear() - 1);
+      return expenses.filter(e => new Date(e.date) >= yearAgo);
+    }
+    return expenses;
+  };
+
   const filteredSales = getFilteredSales();
+  const filteredExpenses = getFilteredExpenses();
   const filteredRevenue = filteredSales.reduce((sum, s) => sum + s.total, 0);
+  const filteredExpenseTotal = filteredExpenses.reduce((sum, e) => sum + e.amount, 0);
+  const filteredNetProfit = filteredRevenue - filteredExpenseTotal;
+
+  const filteredProductSales = filteredSales.reduce((acc, sale) => {
+    acc[sale.productName] = (acc[sale.productName] || 0) + sale.total;
+    return acc;
+  }, {} as Record<string, number>);
+  const filteredTopSeller = Object.entries(filteredProductSales).sort((a, b) => b[1] - a[1])[0];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -153,12 +192,45 @@ export function UnifiedDashboard() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <h1 className="text-[#2d2d2d] dark:text-white text-4xl">Dashboard</h1>
-        <button onClick={() => { setEditingSale(null); setFormData({ productId: '', quantity: '', price: '' }); setIsFormOpen(!isFormOpen); }}
-          className="flex items-center space-x-2 px-6 py-3 bg-[#a8d5e2] dark:bg-[#00ff88] text-[#2d2d2d] dark:text-[#1a1a1a] rounded-xl hover:shadow-lg transition-all">
-          <Plus className="w-5 h-5" /><span>Add Sale</span>
-        </button>
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Date Filter Bar */}
+          <div className="flex items-center gap-2 bg-white/50 dark:bg-white/5 rounded-xl px-3 py-2 border border-black/10 dark:border-white/10">
+            <Calendar className="w-4 h-4 text-[#6b6b6b] dark:text-white/50" />
+            <select
+              value={filter}
+              onChange={(e) => { setFilter(e.target.value as any); setCustomStartDate(''); setCustomEndDate(''); }}
+              className="bg-transparent text-[#2d2d2d] dark:text-white text-sm focus:outline-none"
+            >
+              <option value="today" className="bg-white dark:bg-gray-800">Today</option>
+              <option value="week" className="bg-white dark:bg-gray-800">This Week</option>
+              <option value="month" className="bg-white dark:bg-gray-800">This Month</option>
+              <option value="year" className="bg-white dark:bg-gray-800">This Year</option>
+              <option value="all" className="bg-white dark:bg-gray-800">All Time</option>
+            </select>
+          </div>
+          {/* Custom Date Range */}
+          <div className="flex items-center gap-2">
+            <input
+              type="date"
+              value={customStartDate}
+              onChange={(e) => { setCustomStartDate(e.target.value); setFilter('all'); }}
+              className="px-3 py-2 bg-white/50 dark:bg-white/5 border border-black/20 dark:border-white/20 rounded-lg text-[#2d2d2d] dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#a8d5e2] dark:focus:ring-[#00ff88]"
+            />
+            <span className="text-[#6b6b6b] dark:text-white/50 text-sm">to</span>
+            <input
+              type="date"
+              value={customEndDate}
+              onChange={(e) => { setCustomEndDate(e.target.value); setFilter('all'); }}
+              className="px-3 py-2 bg-white/50 dark:bg-white/5 border border-black/20 dark:border-white/20 rounded-lg text-[#2d2d2d] dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#a8d5e2] dark:focus:ring-[#00ff88]"
+            />
+          </div>
+          <button onClick={() => { setEditingSale(null); setFormData({ productId: '', quantity: '', price: '' }); setIsFormOpen(!isFormOpen); }}
+            className="flex items-center space-x-2 px-6 py-3 bg-[#a8d5e2] dark:bg-[#00ff88] text-[#2d2d2d] dark:text-[#1a1a1a] rounded-xl hover:shadow-lg transition-all">
+            <Plus className="w-5 h-5" /><span>Add Sale</span>
+          </button>
+        </div>
       </div>
 
       {/* KPI Cards */}
@@ -167,7 +239,7 @@ export function UnifiedDashboard() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-[#6b6b6b] dark:text-white/70 text-sm">Total Income</p>
-              <p className="text-[#2d2d2d] dark:text-white text-3xl mt-1">₱{(stats?.totalRevenue || 0).toLocaleString()}</p>
+              <p className="text-[#2d2d2d] dark:text-white text-3xl mt-1">₱{filteredRevenue.toLocaleString()}</p>
               <div className="flex items-center mt-2 text-[#00cc6f] dark:text-[#00ff88] text-sm"><TrendingUp className="w-4 h-4 mr-1" /><span>+12.5%</span></div>
             </div>
             <div className="p-3 bg-[#a8d5e2]/20 dark:bg-[#00ff88]/20 rounded-xl"><DollarSign className="w-8 h-8 text-[#a8d5e2] dark:text-[#00ff88]" /></div>
@@ -177,7 +249,7 @@ export function UnifiedDashboard() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-[#6b6b6b] dark:text-white/70 text-sm">Total Expenses</p>
-              <p className="text-[#2d2d2d] dark:text-white text-3xl mt-1">₱{(stats?.totalExpenses || 0).toLocaleString()}</p>
+              <p className="text-[#2d2d2d] dark:text-white text-3xl mt-1">₱{filteredExpenseTotal.toLocaleString()}</p>
               <div className="flex items-center mt-2 text-red-500 text-sm"><span>-3.2%</span></div>
             </div>
             <div className="p-3 bg-red-500/20 rounded-xl"><ShoppingBag className="w-8 h-8 text-red-500" /></div>
@@ -187,7 +259,7 @@ export function UnifiedDashboard() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-[#6b6b6b] dark:text-white/70 text-sm">Net Profit</p>
-              <p className="text-[#2d2d2d] dark:text-white text-3xl mt-1">₱{(stats?.netProfit || 0).toLocaleString()}</p>
+              <p className="text-[#2d2d2d] dark:text-white text-3xl mt-1">₱{filteredNetProfit.toLocaleString()}</p>
               <div className="flex items-center mt-2 text-[#00cc6f] dark:text-[#00ff88] text-sm"><TrendingUp className="w-4 h-4 mr-1" /><span>+18.7%</span></div>
             </div>
             <div className="p-3 bg-[#a8d5e2]/20 dark:bg-[#00ff88]/20 rounded-xl"><DollarSign className="w-8 h-8 text-[#a8d5e2] dark:text-[#00ff88]" /></div>
@@ -197,8 +269,8 @@ export function UnifiedDashboard() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-[#6b6b6b] dark:text-white/70 text-sm">Top Seller</p>
-              <p className="text-[#2d2d2d] dark:text-white text-xl mt-1">{stats?.topSeller?.productName?.split('(')[0] || 'N/A'}</p>
-              <div className="flex items-center mt-2 text-[#a8d5e2] dark:text-[#00ff88] text-sm"><span>₱{(stats?.topSeller?.totalSales || 0).toLocaleString()}</span></div>
+              <p className="text-[#2d2d2d] dark:text-white text-xl mt-1">{filteredTopSeller?.[0]?.split('(')[0] || 'N/A'}</p>
+              <div className="flex items-center mt-2 text-[#a8d5e2] dark:text-[#00ff88] text-sm"><span>₱{(filteredTopSeller?.[1] || 0).toLocaleString()}</span></div>
             </div>
             <div className="p-3 bg-[#a8d5e2]/20 dark:bg-[#00ff88]/20 rounded-full"><Award className="w-8 h-8 text-[#a8d5e2] dark:text-[#00ff88]" /></div>
           </div>
