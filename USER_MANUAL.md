@@ -7,14 +7,13 @@
 4. [Home Page](#home-page)
 5. [Dashboard](#dashboard)
 6. [Products](#products)
-7. [Sales Log](#sales-log)
-8. [Expenses](#expenses)
-9. [Reports](#reports)
-10. [Analytics](#analytics)
-11. [Settings](#settings)
-12. [Real-Time Sync](#real-time-sync)
-13. [Keyboard Shortcuts & Tips](#keyboard-shortcuts--tips)
-14. [Troubleshooting](#troubleshooting)
+7. [Expenses](#expenses)
+8. [Reports](#reports)
+9. [Analytics](#analytics)
+10. [Settings](#settings)
+11. [Real-Time Sync](#real-time-sync)
+12. [Keyboard Shortcuts & Tips](#keyboard-shortcuts--tips)
+13. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -30,8 +29,8 @@
 
 ### Key Features
 - Add/edit/delete sales, expenses, and products
+- **Date-filtered KPI cards** on Dashboard (Today / Week / Month / Year / Custom)
 - Low-stock alerts
-- Date-range filtering on all data views
 - Pie charts, bar charts, and line graphs
 - CSV export
 - Light & dark mode
@@ -75,7 +74,7 @@ The top navigation bar is always visible and contains:
 | Icon | Page | Purpose |
 |------|------|---------|
 | 🏠 | **Home** | Landing page with quick links |
-| 📊 | **Dashboard** | KPIs, sales entry, charts |
+| 📊 | **Dashboard** | KPIs, sales entry, charts, date filtering |
 | 💰 | **Expenses** | Expense tracking & categorization |
 | 📦 | **Products** | Inventory management |
 | 📄 | **Reports** | Data export & summaries |
@@ -106,16 +105,30 @@ The landing page that welcomes you and provides quick navigation cards.
 
 ## Dashboard (`/dashboard`)
 
-The command center of your store. View KPIs, add/edit sales, and see trend charts — all in one place.
+The command center of your store. View **date-filtered KPIs**, add/edit sales, and see trend charts — all in one place.
 
-### KPI Cards (Top Row)
+### Date Filter Bar (New!)
+
+At the top-right of the Dashboard, next to the **"Add Sale"** button, you will find:
+
+| Control | Description |
+|---------|-------------|
+| **📅 Dropdown** | Select: **Today** / **This Week** / **This Month** / **This Year** / **All Time** |
+| **Start Date** | Pick a custom start date (optional) |
+| **End Date** | Pick a custom end date (optional) |
+
+> **How it works:** When you select a date range, **all 4 KPI cards**, the **charts**, and the **Recent Sales list** update instantly to show only data within that period.
+
+### KPI Cards (Now Date-Filtered!)
 
 | Card | Description |
 |------|-------------|
-| **Total Income** | Sum of all sales revenue |
-| **Total Expenses** | Sum of all recorded expenses |
-| **Net Profit** | `Income − Expenses` |
-| **Top Seller** | Product with highest total sales |
+| **Total Income** | Sum of sales revenue for the **selected date range** |
+| **Total Expenses** | Sum of expenses for the **selected date range** |
+| **Net Profit** | `Income − Expenses` for the **selected date range** |
+| **Top Seller** | Product with highest sales for the **selected date range** |
+
+> **Example:** Select "Today" and the cards show only today's income, expenses, profit, and top seller. Select a custom date range (e.g., Jan 1 to Jan 31) to see January's totals.
 
 ### Add / Edit Sale
 
@@ -136,8 +149,6 @@ The command center of your store. View KPIs, add/edit sales, and see trend chart
 ### Recent Sales Table
 
 - Shows the last 8 sales for the selected filter period.
-- **Filter options:** Today | Week | Month | Year | All Time
-- **Custom Date Range:** Use the two date pickers to select any range.
 - Displays running total: *"Showing X sales — Total: ₱Y"*
 
 ### Charts
@@ -145,7 +156,7 @@ The command center of your store. View KPIs, add/edit sales, and see trend chart
 | Chart | Description |
 |-------|-------------|
 | **Revenue Trend** | Line chart of daily revenue |
-| **Top Products** | Bar chart of best-selling products |
+| **Top Products** | Bar chart of best-selling products (filtered by date) |
 | **Expense Distribution** | Pie chart of expenses by category |
 
 ### Real-Time Behavior
@@ -218,39 +229,6 @@ Manage your store's inventory. Track stock levels, sales per product, and receiv
 
 ---
 
-## Sales Log (`/sales`)
-
-A dedicated page for viewing and managing all sales transactions.
-
-### Summary Cards
-
-| Card | Description |
-|------|-------------|
-| **Total Sales** | Revenue for the filtered period |
-| **Transactions** | Number of sales in the period |
-| **Average Sale** | Average transaction value |
-
-### Add / Edit Sale
-
-Same workflow as Dashboard (see [Dashboard > Add / Edit Sale](#dashboard)).
-
-### Filter Sales
-
-- **Today** — Sales from the current calendar day
-- **This Week** — Last 7 days
-- **This Month** — Last 30 days
-- **All Time** — Every sale ever recorded
-- **Custom Range** — Use the date pickers to select any start and end date
-
-### Sales Table
-
-Columns: Product | Qty | Price | Total | Date | Actions
-
-- Click **✏️ Edit** to modify a sale.
-- Click **🗑️ Delete** to remove a sale (stock is automatically restored).
-
----
-
 ## Expenses (`/expenses`)
 
 Track all business expenses by category. Add, edit, and delete expense records with full date filtering.
@@ -306,6 +284,8 @@ Columns: Title | Category | Amount | Date | Actions
 | **This Year** | Last 12 months |
 | **Custom** | Select any start and end date |
 
+> **Note:** The "Today" filter now works correctly regardless of your timezone. It matches your computer's local date.
+
 ### Real-Time Behavior
 - Expenses added/edited/deleted from any tab update this page instantly.
 - Dashboard's Total Expenses and Net Profit update simultaneously.
@@ -329,6 +309,8 @@ Generate financial summaries and export data for bookkeeping or tax purposes.
 
 Same filter bar as Expenses (Today / Week / Month / Year / Custom).
 All summary cards, charts, and tables update reactively.
+
+> **Note:** The "Today" filter now works correctly regardless of your timezone.
 
 ### Top Selling Products
 
@@ -428,7 +410,7 @@ Configure the application appearance and manage data.
 
 | Field | Value |
 |-------|-------|
-| **Version** | 1.0.0 |
+| **Version** | 1.1.0 |
 | **Application** | Sari-Sari Profit Tracker |
 | **Purpose** | Manage Philippine retail store operations |
 
@@ -442,9 +424,9 @@ The system uses **WebSockets (Socket.io)** to synchronize data across all open b
 
 | Action | Pages Affected |
 |--------|---------------|
-| Add a sale | Dashboard, Sales, Products, Reports, Analytics |
-| Edit a sale | Dashboard, Sales, Products, Reports, Analytics |
-| Delete a sale | Dashboard, Sales, Products, Reports, Analytics |
+| Add a sale | Dashboard, Products, Reports, Analytics |
+| Edit a sale | Dashboard, Products, Reports, Analytics |
+| Delete a sale | Dashboard, Products, Reports, Analytics |
 | Add a product | Dashboard, Products, Reports |
 | Edit a product | Dashboard, Products |
 | Delete a product | Dashboard, Products, Reports |
@@ -475,6 +457,7 @@ The system uses **WebSockets (Socket.io)** to synchronize data across all open b
 2. **Use the date picker** when recording back-dated expenses or sales.
 3. **Filter before exporting** — Reports CSV reflects the currently selected date range.
 4. **Record sales from Products page** — The "Sell" button auto-fills product details and validates stock.
+5. **Use Dashboard date filters** to quickly check today's or this week's performance without leaving the main view.
 
 ---
 
@@ -489,6 +472,11 @@ The system uses **WebSockets (Socket.io)** to synchronize data across all open b
 ### "Failed to load expenses" Toast
 - Backend may not be running. Start it with `cd backend && npm run dev`.
 - Check that port 3001 is not in use by another application.
+
+### "Today" Filter Shows No Data
+- This was a timezone bug that has been fixed.
+- If you still see no data, check that your computer's date is correct.
+- Try re-seeding the database: `cd backend && npm run seed`
 
 ### Data Not Syncing Across Tabs
 - Ensure both tabs are connected to the same backend URL.
@@ -516,5 +504,4 @@ npm run dev
 
 ---
 
-*End of User Manual — BorelaSari-Sari v1.0.0*
-
+*End of User Manual — BorelaSari-Sari v1.1.0*
