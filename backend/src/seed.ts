@@ -2,6 +2,21 @@ import { db, initDb } from './db.js';
 
 initDb();
 
+// Helper to get date string N days ago
+const daysAgo = (n: number) => {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  return d.toISOString().split('T')[0];
+};
+
+const today = daysAgo(0);
+const yesterday = daysAgo(1);
+const twoDaysAgo = daysAgo(2);
+const threeDaysAgo = daysAgo(3);
+const tenDaysAgo = daysAgo(10);
+const fifteenDaysAgo = daysAgo(15);
+const twentyDaysAgo = daysAgo(20);
+
 const products = [
   { name: 'Rice (50kg sack)', category: 'Staples', price: 2500, stock: 15, unit: 'sack', lowStockThreshold: 5 },
   { name: 'Eggs (tray)', category: 'Fresh', price: 240, stock: 8, unit: 'tray', lowStockThreshold: 3 },
@@ -18,21 +33,21 @@ const products = [
 ];
 
 const sales = [
-  { productId: 1, productName: 'Rice (50kg sack)', quantity: 2, price: 2500, total: 5000, date: '2026-04-26' },
-  { productId: 2, productName: 'Eggs (tray)', quantity: 3, price: 240, total: 720, date: '2026-04-26' },
-  { productId: 5, productName: 'Soft Drinks (Coke)', quantity: 10, price: 45, total: 450, date: '2026-04-26' },
-  { productId: 12, productName: 'Canned Sardines', quantity: 15, price: 28, total: 420, date: '2026-04-25' },
-  { productId: 3, productName: 'Frozen Chicken', quantity: 5, price: 180, total: 900, date: '2026-04-25' },
-  { productId: 9, productName: 'Bear Brand', quantity: 8, price: 35, total: 280, date: '2026-04-24' },
-  { productId: 11, productName: 'Milo', quantity: 4, price: 180, total: 720, date: '2026-04-24' },
-  { productId: 4, productName: 'Hotdogs', quantity: 12, price: 120, total: 1440, date: '2026-04-23' },
+  { productId: 1, productName: 'Rice (50kg sack)', quantity: 2, price: 2500, total: 5000, date: today },
+  { productId: 2, productName: 'Eggs (tray)', quantity: 3, price: 240, total: 720, date: today },
+  { productId: 5, productName: 'Soft Drinks (Coke)', quantity: 10, price: 45, total: 450, date: today },
+  { productId: 12, productName: 'Canned Sardines', quantity: 15, price: 28, total: 420, date: yesterday },
+  { productId: 3, productName: 'Frozen Chicken', quantity: 5, price: 180, total: 900, date: yesterday },
+  { productId: 9, productName: 'Bear Brand', quantity: 8, price: 35, total: 280, date: twoDaysAgo },
+  { productId: 11, productName: 'Milo', quantity: 4, price: 180, total: 720, date: twoDaysAgo },
+  { productId: 4, productName: 'Hotdogs', quantity: 12, price: 120, total: 1440, date: threeDaysAgo },
 ];
 
 const expenses = [
-  { category: 'Supplies', amount: 5000, description: 'Restock inventory', date: '2026-04-20' },
-  { category: 'Rent', amount: 3000, description: 'Monthly rent', date: '2026-04-01' },
-  { category: 'Utilities', amount: 1500, description: 'Electricity bill', date: '2026-04-15' },
-  { category: 'Supplies', amount: 2000, description: 'Plastic bags, containers', date: '2026-04-10' },
+  { category: 'Supplies', amount: 5000, description: 'Restock inventory', date: today },
+  { category: 'Rent', amount: 3000, description: 'Monthly rent', date: tenDaysAgo },
+  { category: 'Utilities', amount: 1500, description: 'Electricity bill', date: fifteenDaysAgo },
+  { category: 'Supplies', amount: 2000, description: 'Plastic bags, containers', date: twentyDaysAgo },
 ];
 
 // Clear existing data
