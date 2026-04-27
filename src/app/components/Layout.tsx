@@ -1,6 +1,6 @@
 import { ReactNode, useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router';
-import { Home, ShoppingCart, DollarSign, Package, BarChart3, FileText, Sun, Moon, Settings } from 'lucide-react';
+import { Home, DollarSign, Package, BarChart3, FileText, Sun, Moon, Settings } from 'lucide-react';
 
 interface LayoutProps {
   children: ReactNode;
@@ -29,7 +29,6 @@ export function Layout({ children }: LayoutProps) {
   const navItems = [
     { path: '/', icon: Home, label: 'Home' },
     { path: '/dashboard', icon: BarChart3, label: 'Dashboard' },
-    { path: '/sales', icon: ShoppingCart, label: 'Sales' },
     { path: '/expenses', icon: DollarSign, label: 'Expenses' },
     { path: '/products', icon: Package, label: 'Products' },
     { path: '/reports', icon: FileText, label: 'Reports' },
