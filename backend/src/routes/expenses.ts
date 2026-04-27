@@ -3,9 +3,25 @@ import { db } from '../db.js';
 
 const router = Router();
 
-router.get('/', (_req, res) => {
+router.get('/', (req, res) => {
   try {
-    const expenses = db.prepare('SELECT * FROM expenses ORDER BY createdAt DESC').all();
+    const { startDate, endDate } = req.query;
+    let sql = 'SELECT * FROM expenses';
+    const params: any[] = [];
+
+    if (startDate && endDate) {
+      sql += ' WHERE date >= ? AND date <= ?';
+      params.push(startDate as string, endDate as string);
+    } else if (startDate) {
+      sql += ' WHERE date >= ?';
+      params.push(startDate as string);
+    } else if (endDate) {
+      sql += ' WHERE date <= ?';
+      params.push(endDate as string);
+    }
+
+    sql += ' ORDER BY createdAt DESC';
+    const expenses = db.prepare(sql).all(...params);
     res.json(expenses);
   } catch (err) {
     res.status(500).json({ error: (err as Error).message });
@@ -22,6 +38,22 @@ router.post('/', (req, res) => {
     const expense = db.prepare('SELECT * FROM expenses WHERE id = ?').get(result.lastInsertRowid);
     (req as any).io.emit('expense:created', expense);
     res.status(201).json(expense);
+  } catch (err) {
+    res.status(500).json({ error: (err as Error).message });
+  }
+});
+
+router.put('/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    const { category, amount, description, date } = req.body;
+    const stmt = db.prepare(
+      'UPDATE expenses SET category = ?, amount = ?, description = ?, date = ? WHERE id = ?'
+    );
+    stmt.run(category, amount, description, date, id);
+    const expense = db.prepare('SELECT * FROM expenses WHERE id = ?').get(id);
+    (req as any).io.emit('expense:updated', expense);
+    res.json(expense);
   } catch (err) {
     res.status(500).json({ error: (err as Error).message });
   }

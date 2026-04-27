@@ -3,8 +3,15 @@
 This is a detailed, step-by-step guide to deploy your Sari-Sari Store app to production.
 
 **What we are deploying:**
-- **Frontend** (React + Vite) → Vercel (free hosting)
-- **Backend** (Node.js + Express + SQLite + Socket.io) → Render (free tier)
+- **Frontend** (React + Vite) → Vercel (**100% FREE**)
+- **Backend** (Node.js + Express + SQLite + Socket.io) → Render (**100% FREE**)
+
+**Cost: $0.00 — Both services have generous free tiers that are perfect for this project.**
+
+| Service | Free Tier Includes |
+|---------|-------------------|
+| **Vercel** | Unlimited static sites, 100GB bandwidth/mo, custom domains |
+| **Render** | 1 web service (always free), 512MB RAM, 1 CPU |
 
 **Before you start:** Make sure your code is pushed to a GitHub repository.
 
@@ -104,26 +111,19 @@ Now click the **"Create Web Service"** button at the bottom.
 4. After adding both, scroll down and click **"Save Changes"**
 5. Render will automatically redeploy with the new environment variables
 
-## Step 7: Seed the Database on Render
+## Step 7: Database Auto-Seeds (No Shell Needed!)
 
-The database starts empty. We need to add the starter data.
+**Good news:** The backend automatically seeds the database on its very first startup. You do NOT need to run any commands.
 
-1. On your service page, click the **"Shell"** tab
-2. You will see a terminal interface
-3. Run this command exactly:
-
-```bash
-node dist/seed.js
+When the service starts for the first time, you will see this in the logs:
+```
+Database empty — auto-seeding...
+Auto-seed complete!
 ```
 
-4. You should see output: `Database seeded successfully!`
-5. If you get "module not found" error, run this first:
+This only happens once. After that, your data persists across restarts.
 
-```bash
-npm install && npm run build
-```
-
-Then run the seed command again.
+> **Why this matters:** Render's free tier does not include Shell access. We built auto-seeding so you never need it.
 
 ## Step 8: Test Your Backend URL
 
@@ -329,9 +329,12 @@ If real-time sync works, your Socket.io is configured correctly.
 
 **Symptom:** No products, sales, or expenses show up
 **Fix:**
-1. Go to Render → Shell
-2. Run: `node dist/seed.js`
-3. If that fails, run: `npm run build && node dist/seed.js`
+1. Check Render logs — look for `Database empty — auto-seeding...`
+2. If you don't see that message, the auto-seed may have failed
+3. Redeploy the service: Render Dashboard → Manual Deploy → Deploy Latest Commit
+4. Check logs again after redeploy
+
+> **Note:** On Render free tier, the database is seeded automatically on first startup. No manual commands needed.
 
 ## Problem: "Build Failed" on Vercel
 

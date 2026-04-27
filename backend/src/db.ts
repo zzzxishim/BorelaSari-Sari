@@ -46,3 +46,11 @@ export function initDb() {
 
 initDb();
 
+// Auto-seed if database is empty (for Render free tier — no Shell access)
+const productCount = (db.prepare('SELECT COUNT(*) as count FROM products').get() as any).count;
+if (productCount === 0) {
+  console.log('Database empty — auto-seeding...');
+  const seedModule = await import('./seed.js');
+  console.log('Auto-seed complete!');
+}
+
