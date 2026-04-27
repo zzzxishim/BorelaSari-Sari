@@ -9,7 +9,7 @@ export function Sales() {
   const [sales, setSales] = useState<Sale[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<'today' | 'week' | 'month' | 'all'>('today');
+  const [filter, setFilter] = useState<'today' | 'week' | 'month' | 'all'>('all');
   const [customStartDate, setCustomStartDate] = useState('');
   const [customEndDate, setCustomEndDate] = useState('');
   const [isFormOpen, setIsFormOpen] = useState(false);
