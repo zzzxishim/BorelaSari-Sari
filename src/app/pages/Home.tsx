@@ -12,7 +12,7 @@ export function Home() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+<div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
         <Link to="/dashboard">
           <GlassCard className="hover:scale-105 transition-transform cursor-pointer">
             <div className="flex flex-col items-center text-center space-y-4">
